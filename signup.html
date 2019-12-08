@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sign Up</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./css/style.css">
+
+</head>
+<body>
+        <header>
+                <div class="container">
+                    <div class="row">
+                        <div class="">
+                            <h1>SandDance </h1>
+                        </div>
+        
+                        <div class="col right">
+                            <a href="./login.html"><button>Log In</button></a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+        
+<div>
+  <div class="modal-content animate">
+    <div class="imgcontainer">
+      <!-- <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span> -->
+      <img src="./images/avatar.png" alt="Avatar" class="avatar">
+    </div>
+
+    <div class="container">
+      <label for="email"><b>Email</b></label>
+      <input type="text" placeholder="Enter Email" name="email" id="email" required>
+
+      <label for="password"><b>Password</b></label>
+      <input type="password" placeholder="Enter Password" name="password" id="password" required>
+
+      <label for="psw-repeat"><b>Repeat Password</b></label>
+      <input type="password" placeholder="Repeat Password" name="repeat_password" id="repeat_password" required>
+        
+      <button type="submit" style="width: 100%;" id="signup"> Sign Up </button>
+    </div>
+</div>
+</div>
+
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-app.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-analytics.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-auth.js"></script>
+<script src="./js/firebase_config.js"></script>
+
+<script>
+    function handleSignUp() {
+      document.getElementById('signup').disabled=true;
+      var email = document.getElementById('email').value;
+      var password = document.getElementById('password').value;
+      var repeat_password = document.getElementById('repeat_password').value;
+      if (email.length < 4) {
+        alert('Please enter an email address.');
+        return;
+      }
+      if (password.length < 6) {
+        alert('minimum Password length should be 6.');
+        return;
+      }
+      if(password!=repeat_password){
+          alert("Passwords did not match.");
+          return;
+      }
+      // Sign in with email and pass.
+      // [START createwithemail]
+      firebase.auth().createUserWithEmailAndPassword(email, password).then(function(user){
+        alert("Account created Successfully.")
+        window.location.href="./login.html";
+      })
+      .catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // [START_EXCLUDE]
+        if (errorCode == 'auth/weak-password') {
+          alert('The password is too weak.');
+        } else {
+          alert(errorMessage);
+        }
+        console.log(error);
+        // [END_EXCLUDE]
+      });
+      // [END createwithemail]
+      document.getElementById('signup').disabled=false;
+    }
+    /**
+     * initApp handles setting up UI event listeners and registering Firebase auth listeners:
+     *  - firebase.auth().onAuthStateChanged: This listener is called when the user is signed in or
+     *    out, and that is where we update the UI.
+     */
+     function initApp() {
+      // Listening for auth state changes.
+      // [START authstatelistener]
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          // User is signed in.
+          window.location.href='./index.html'
+          var displayName = user.displayName;
+          var email = user.email;
+          var emailVerified = user.emailVerified;
+          var photoURL = user.photoURL;
+          var isAnonymous = user.isAnonymous;
+          var uid = user.uid;
+          var providerData = user.providerData;
+          // [START_EXCLUDE]
+          // [END_EXCLUDE]
+        } else {
+          // User is signed out.
+          // [START_EXCLUDE]
+          // [END_EXCLUDE]
+        }
+        // [START_EXCLUDE silent]
+      });
+      // [END authstatelistener]
+      document.getElementById('signup').addEventListener('click', handleSignUp, false);
+    }
+    window.onload = function() {
+      initApp();
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SandDance</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./css/style.css">
+<link rel="stylesheet" href="css/sanddance.css">
+<style>
+#graph { 
+    position: absolute;
+    bottom: 2px;
+    top: 180px;
+    left: 1em;
+    right: 0;
+}
+.sanddance-gl { 
+    right: 290px;    
+    border: solid 1px black;
+}
+.sanddance-panel {
+    width: 250px;
+}
+.vega-bind-name {
+    display: block;
+}
+
+</style>
+</head>
+<body>
+
+    <header>
+            <div class="container">
+                <div class="row">
+                    <div class="">
+                        <h1>SandDance</h1>
+                    </div>
+                    <div class="col right">
+                            <span id="email" style="color:white;"></span>
+                        <p id="logout"><button>Logout</button></p>
+                    </div>
+                </div>
+            </div>
+            <!-- <span><img src="./images/avatar.png" style="width: 48px;"/></span>    -->
+    </header>
+    <div>
+      <div>
+        <input type="file" id="file">
+        X-axis
+        <select name="xaxis" id="xaxis"></select>
+        Y-axis
+        <select name="yaxis" id="yaxis"></select>
+        Z-axis
+        <select name="zaxis" id="zaxis"></select>
+        Color 
+        <select name="color" id="color"></select>
+
+        Scheme
+        <select name="scheme" id="scheme">
+          <option value="" disabled style="font-weight:bold; color: blue;">For Numeric Fields</option>
+          <option value="" disabled>Sequential Single Hue</option>
+          <option value="blues">Blues</option>
+          <option value="greens">Greens</option>
+          <option value="purples">Purples</option>
+          <option value="reds">Reds</option>
+          <option value="oranges">Oranges</option>
+          <option value="" disabled>Sequential Multi Hue</option>
+          <option value="bluegreen">BlueGreen</option>
+          <option value="bluepurple">BluePurple</option>
+          <option value="greenblue">GreenBlue</option>
+          <option value="orangered">OrangeRed</option>
+          <option value="purplebluegreen">PurpleBlueGreen</option>
+          <option value="plasma">Plasma</option>
+          <option value="viridis">Viridis</option>
+          <option value="inferno">Inferno</option>
+          <option value="magma">Magma</option>
+          <option value="purpleblue">PurpleBlue</option>
+          <option value="" disabled>Diverging</option>
+          <option value="spectral" selected>Spectral</option>
+          <option value="redgrey">RedGrey</option>
+          <option value="redyellowblue">RedYellowBlue</option>
+          <option value="purpleorange">PurpleOrange</option>
+          <option value="redblue">RedBlue</option>
+          <option value="" disabled style="font-weight:bold; color: blue;">For Categorical Fields</option>
+          <option value="accent">Accent</option>
+          <option value="dark2">Dark2</option>
+          <option value="category10">Category10</option>
+          <option value="category20">Category20</option>
+          <option value="category20b">Category20b</option>
+        </select>
+
+        Chart
+        <select name="chart" id="chart">
+          
+          <option value="scatterplot">scatterplot</option>
+          <option value="barchart">barchart</option>
+          <option value="grid">Grid</option>
+          <option value="density">Density</option>
+          <option value="stacks">Stacks</option>
+          <option value="treemap">Treemap</option>
+        </select>
+        view
+        <select name="view" id="view">
+          <option value="2d">2D</option>
+          <option value="3d">3D</option>
+        </select>
+      </div>
+
+      <div id="graph"></div>
+    
+    </div>
+
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-app.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-analytics.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-auth.js"></script>
+<script src="./js/firebase_config.js"></script>
+
+<script>
+    function logout(){
+        if (firebase.auth().currentUser) {
+            firebase.auth().signOut();
+            window.location.href="login.html";
+      } 
+    }
+  
+     function initApp() {
+      // Listening for auth state changes.
+      // [START authstatelistener]
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          // User is signed in.
+          var displayName = user.displayName;
+          var email = user.email;
+          var emailVerified = user.emailVerified;
+          var photoURL = user.photoURL;
+          var isAnonymous = user.isAnonymous;
+          var uid = user.uid;
+          var providerData = user.providerData;
+          // [START_EXCLUDE]
+          // [END_EXCLUDE]
+          document.getElementById('email').textContent=email;
+
+        } else {
+           window.location.href="login.html";
+          // User is signed out.
+          // [START_EXCLUDE]
+          // [END_EXCLUDE]
+        }
+        // [START_EXCLUDE silent]
+      });
+      // [END authstatelistener]
+      document.getElementById('logout').addEventListener('click', logout);
+    }
+    // window.onload = function() {
+    //   initApp();
+    // };
+</script>
+
+<!-- SandDance Scripts -->
+<script src="https://unpkg.com/vega-lib/build/vega.js" charset="utf-8"></script>
+<script src="https://unpkg.com/deck.gl@~6.4/deckgl.min.js"></script>
+<script src="./js/sanddance.js"></script>
+
+<script>
+    window.onload=function(){
+      initApp();
+      document.getElementById('xaxis').addEventListener('change', plotGrapg);
+      document.getElementById('yaxis').addEventListener('change', plotGrapg);
+      document.getElementById('zaxis').addEventListener('change', plotGrapg);
+      document.getElementById('chart').addEventListener('change', plotGrapg);
+      document.getElementById('view').addEventListener('change', plotGrapg);
+      document.getElementById('color').addEventListener('change', plotGrapg);
+      document.getElementById('scheme').addEventListener('change', plotGrapg);
+    }
+    var data=[];
+    var options={};
+    // data = [
+    //     { myUid: 0, myColor: 0, mySort: 0, myX: 0, myY: 0, myZ: 0 },
+    //     { myUid: 1, myColor: 1, mySort: 1, myX: 1, myY: 1, myZ: 1 },
+    //     { myUid: 2, myColor: 2, mySort: 2, myX: 2, myY: 2, myZ: 2 }
+    // ];
+    options = {
+        columns: {
+            color: '',
+            // sort: 'mySort',
+            // uid: 'myUid',
+            x: '',
+            y: '',
+            z: ''
+        },
+        size: {
+            height: 800,
+            width: 800
+        },
+        chart: 'scatterplot',
+        // chart: 'barchart',
+        // chart: 'treemap',
+        view: '2d',
+        scheme: 'redblue'
+    };
+    function plotGrapg(){
+      var xaxis = document.getElementById("xaxis");
+      var x = xaxis.options[xaxis.selectedIndex].value;
+      
+      var yaxis = document.getElementById("yaxis");
+      var y = yaxis.options[yaxis.selectedIndex].value;
+
+      var zaxis = document.getElementById("zaxis");
+      var z = zaxis.options[zaxis.selectedIndex].value;
+
+      var color = document.getElementById("color");
+      var col = color.options[color.selectedIndex].value;
+
+      var chart = document.getElementById("chart");
+      var c = chart.options[chart.selectedIndex].value;
+
+      var view = document.getElementById("view");
+      var v = view.options[view.selectedIndex].value;
+
+      var scheme = document.getElementById("scheme");
+      var s = scheme.options[scheme.selectedIndex].value;
+      
+      options.columns.x=x;
+      options.columns.y=y;
+      options.columns.z=z;
+      options.columns.color=col;
+      options.chart=c;
+      options.view=v;
+      options.scheme=s;
+
+
+      SandDance.use(vega, deck, deck, luma);
+      viewer = new SandDance.Viewer(document.querySelector('#graph'));
+      viewer.render(options, data);
+    }
+    document.getElementById("file").addEventListener('change',function(){
+      var fr = new FileReader();
+      fr.onload=function(){
+        
+        var lines =this.result.split('\n');
+        var headings=lines[0].split(',')
+        console.log(typeof(lines),lines);
+        console.log(typeof(headings),headings);
+        for(var i=1;i<lines.length;i++){
+          data[i-1]={}
+          var values=lines[i].split(',');
+          for(var j=0;j<headings.length;j++){
+            data[i-1][headings[j]]=values[j];
+          }
+        }
+        console.log(data)
+        var xaxis = document.getElementById("xaxis");
+        var yaxis = document.getElementById("yaxis");
+        var zaxis = document.getElementById("zaxis");
+        var color = document.getElementById("color");
+        for (var i = 0; i<headings.length; i++){
+            var opt = document.createElement('option');
+            opt.value =headings[i];
+            opt.innerHTML = headings[i];
+            xaxis.appendChild(opt);
+        }
+        for (var i = 0; i<headings.length; i++){
+            var opt = document.createElement('option');
+            opt.value =headings[i];
+            opt.innerHTML = headings[i];
+            yaxis.appendChild(opt);
+        }
+        for (var i = 0; i<headings.length; i++){
+            var opt = document.createElement('option');
+            opt.value =headings[i];
+            opt.innerHTML = headings[i];
+            zaxis.appendChild(opt);
+        }
+        for (var i = 0; i<headings.length; i++){
+            var opt = document.createElement('option');
+            opt.value =headings[i];
+            opt.innerHTML = headings[i];
+            color.appendChild(opt);
+        }
+        plotGrapg();
+      }
+      fr.readAsText(this.files[0]);
+    });
+</script>
+
+</body>
+</html>
